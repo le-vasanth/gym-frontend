@@ -130,11 +130,9 @@ export default function MemberDirectoryView({
                     <h3 style={{ fontSize: '1.05rem', margin: 0, fontWeight: 700 }}>
                       {member.name}
                     </h3>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span>ID: {member.id}</span>
-                      <span>•</span>
-                      <span style={{ color: '#059669', fontWeight: 700 }}>PIN: {member.pin || '1234'} 🔒</span>
-                    </span>
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
+                      ID: {member.id}
+                    </div>
                   </div>
                 </div>
 

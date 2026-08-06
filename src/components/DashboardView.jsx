@@ -14,7 +14,7 @@ import {
   IndianRupee,
   Receipt
 } from 'lucide-react';
-import { initialTransactions } from '../data/mockGymData';
+// Cleaned up mock data import
 
 export default function DashboardView({ 
   members, 
@@ -24,7 +24,7 @@ export default function DashboardView({
   onOpenCheckInModal,
   onSelectMember 
 }) {
-  const safeTransactions = (transactions && transactions.length > 0) ? transactions : initialTransactions;
+  const safeTransactions = transactions || [];
   const recentCheckIns = members.slice(0, 4);
 
   return (
@@ -57,7 +57,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
             <h3 style={{ fontSize: '1.9rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
-              {analytics?.monthlyRevenue || '₹31,600'}
+              {analytics?.monthlyRevenue || '₹0'}
             </h3>
             <span style={{ fontSize: '0.8rem', color: '#15803d', fontWeight: 700 }}>
               {safeTransactions.length} Paid Receipts
@@ -85,7 +85,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
             <h3 style={{ fontSize: '1.85rem', fontWeight: 800, margin: 0 }}>
-              {members.filter(m => m.status === 'Active').length + 406}
+              {members.filter(m => m.status === 'Active').length}
             </h3>
             <span className="badge badge-cyan">94% Active</span>
           </div>

@@ -138,6 +138,21 @@ export default function AttendanceView({
     }
   };
 
+  React.useEffect(() => {
+    if (viewMode !== 'kiosk') return;
+    const handleKeyDown = (e) => {
+      if (/^[0-9]$/.test(e.key)) {
+        handleKeyPress(e.key);
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        handleKeyPress('CLEAR');
+      } else if (e.key === 'Enter') {
+        handleNumpadSubmit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewMode, kioskStep, kioskDigit, pinDigit]);
+
   const verifyPinAndCheckIn = (enteredPin) => {
     if (!pendingMember) return;
     const memberPin = pendingMember.pin || '1234';

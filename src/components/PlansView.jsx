@@ -20,7 +20,7 @@ export default function PlansView({ plans }) {
           </p>
         </div>
 
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => alert("Custom Plan creation will be available in a future update!")}>
           <Plus size={16} />
           <span>+ Create New Plan</span>
         </button>
@@ -87,10 +87,10 @@ export default function PlansView({ plans }) {
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button className="btn-secondary" style={{ flex: 1, padding: '0.65rem' }}>
+                <button className="btn-secondary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => alert("Pricing edits require Admin PRO access.")}>
                   Edit Pricing
                 </button>
-                <button className="btn-primary" style={{ flex: 1, padding: '0.65rem' }}>
+                <button className="btn-primary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => alert("To assign this plan, go to the Payments tab and click + Add Member!")}>
                   Assign Plan
                 </button>
               </div>

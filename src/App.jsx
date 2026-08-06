@@ -16,8 +16,7 @@ import EditProfileModal from './components/EditProfileModal';
 import PhotoViewerModal from './components/PhotoViewerModal';
 
 import { 
-  gymPlans, 
-  analyticsData 
+  gymPlans
 } from './data/mockGymData';
 import { CheckCircle2 } from 'lucide-react';
 import { api } from './api';
@@ -67,7 +66,13 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [plans] = useState(gymPlans);
-  const [analytics, setAnalytics] = useState(analyticsData);
+
+  // Dynamically calculate analytics
+  const analytics = {
+    monthlyRevenue: `₹${transactions.reduce((acc, t) => acc + (parseInt(String(t.amount).replace(/,/g, ''), 10) || 0), 0).toLocaleString()}`,
+    todayCheckIns: attendanceLogs.filter(l => l.date === 'Today').length,
+    expiringThisWeek: members.filter(m => m.paymentStatus === 'Due Soon' || m.paymentStatus === 'Overdue').length
+  };
 
   // Load from API on mount
   React.useEffect(() => {
