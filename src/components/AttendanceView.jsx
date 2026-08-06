@@ -101,6 +101,15 @@ export default function AttendanceView({
       }
       return;
     }
+    
+    if (key === 'BACKSPACE') {
+      if (kioskStep === 1) {
+        setKioskDigit(prev => prev.slice(0, -1));
+      } else {
+        setPinDigit(prev => prev.slice(0, -1));
+      }
+      return;
+    }
 
     if (kioskStep === 1) {
       if (kioskDigit.length < 4) {
@@ -144,7 +153,7 @@ export default function AttendanceView({
       if (/^[0-9]$/.test(e.key)) {
         handleKeyPress(e.key);
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        handleKeyPress('CLEAR');
+        handleKeyPress('BACKSPACE');
       } else if (e.key === 'Enter') {
         handleNumpadSubmit();
       }
