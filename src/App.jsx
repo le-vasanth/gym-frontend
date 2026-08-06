@@ -69,7 +69,7 @@ export default function App() {
 
   // Dynamically calculate analytics
   const analytics = {
-    monthlyRevenue: `₹${transactions.reduce((acc, t) => acc + (parseInt(String(t.amount).replace(/,/g, ''), 10) || 0), 0).toLocaleString()}`,
+    monthlyRevenue: `₹${transactions.reduce((acc, t) => acc + (parseInt(String(t.amount).replace(/\D/g, ''), 10) || 0), 0).toLocaleString()}`,
     todayCheckIns: attendanceLogs.filter(l => l.date === 'Today').length,
     expiringThisWeek: members.filter(m => m.paymentStatus === 'Due Soon' || m.paymentStatus === 'Overdue').length
   };
@@ -397,6 +397,7 @@ export default function App() {
           {activeTab === 'plans' && (
             <PlansView
               plans={plans}
+              showToast={showToast}
             />
           )}
         </main>

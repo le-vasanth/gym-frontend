@@ -139,7 +139,7 @@ export default function AttendanceView({
   };
 
   React.useEffect(() => {
-    if (viewMode !== 'kiosk') return;
+    if (activeMode !== 'kiosk') return;
     const handleKeyDown = (e) => {
       if (/^[0-9]$/.test(e.key)) {
         handleKeyPress(e.key);
@@ -151,7 +151,7 @@ export default function AttendanceView({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [viewMode, kioskStep, kioskDigit, pinDigit]);
+  }, [activeMode, kioskStep, kioskDigit, pinDigit]);
 
   const verifyPinAndCheckIn = (enteredPin) => {
     if (!pendingMember) return;
