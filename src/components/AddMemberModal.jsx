@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, UserPlus, Camera, Upload, Trash2 } from 'lucide-react';
-import { gymPlans, gymTrainers } from '../data/mockGymData';
+import { X, UserPlus, Camera, Upload, Trash2 } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 
-export default function AddMemberModal({ onClose, onAddMember, initialMember, onEditMember }) {
+export default function AddMemberModal({ onClose, onAddMember, initialMember, onEditMember, plans = [] }) {
   const [formData, setFormData] = useState({
     name: initialMember ? initialMember.name : '',
     phone: initialMember ? initialMember.phone : '',
@@ -11,7 +11,8 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
     avatar: initialMember?.avatar || '',
     plan: initialMember ? initialMember.plan : 'VIP Annual All-Access',
     paymentStatus: initialMember ? initialMember.paymentStatus : 'Paid',
-    trainer: initialMember ? initialMember.trainer : 'Elena Rostova',
+    trainer: initialMember ? initialMember.trainer : '',
+    trainerPhone: initialMember?.trainerPhone || '',
     weight: initialMember?.bodyStats?.weight || '75 kg',
     height: initialMember?.bodyStats?.height || '175 cm',
     bodyFat: initialMember?.bodyStats?.bodyFat || '15%',
@@ -92,13 +93,18 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
       d.setDate(d.getDate() + 7);
       return d.toISOString().split('T')[0];
     }
-    // Calculate from today based on plan duration
-    if (planName.includes('6-Month') || planName.includes('6-month')) {
-      today.setMonth(today.getMonth() + 6);
-    } else if (planName.includes('Monthly') || planName.includes('Month') || planName.includes('monthly')) {
-      today.setMonth(today.getMonth() + 1);
+    
+    const selectedPlanObj = plans.find(p => p.name === planName);
+    if (selectedPlanObj) {
+      const durationStr = selectedPlanObj.duration.toLowerCase();
+      if (durationStr.includes('6 month') || durationStr.includes('6-month')) {
+        today.setMonth(today.getMonth() + 6);
+      } else if (durationStr.includes('month')) {
+        today.setMonth(today.getMonth() + 1);
+      } else {
+        today.setFullYear(today.getFullYear() + 1);
+      }
     } else {
-      // Annual / Yearly default
       today.setFullYear(today.getFullYear() + 1);
     }
     return today.toISOString().split('T')[0];
@@ -108,18 +114,10 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
     e.preventDefault();
     if (!formData.name || !formData.phone) return;
 
-    let planPrice = 12500;
-    let planCycle = 'Yearly';
-    let planType = 'Yearly Plan (12 Months)';
-    if (formData.plan.includes('6-Month') || formData.plan.includes('6-month')) {
-      planPrice = 7500;
-      planCycle = '6-Month';
-      planType = '6-Month Plan (6 Months)';
-    } else if (formData.plan.includes('Monthly') || formData.plan.includes('Month') || formData.plan.includes('monthly')) {
-      planPrice = 1800;
-      planCycle = 'Monthly';
-      planType = 'Monthly Plan (1 Month)';
-    }
+    const selectedPlanObj = plans.find(p => p.name === formData.plan) || plans[0] || { price: '0', duration: 'Unknown', name: 'Unknown' };
+    const planPrice = parseInt(String(selectedPlanObj.price).replace(/\D/g, ''), 10) || 0;
+    const planCycle = selectedPlanObj.duration;
+    const planType = selectedPlanObj.name;
 
     const todayStr = new Date().toISOString().split('T')[0];
     let pStatus = formData.paymentStatus || 'Paid';
@@ -143,6 +141,7 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
         nextDueDate: nextDue,
         expiresAt: nextDue,
         trainer: formData.trainer,
+        trainerPhone: formData.trainerPhone,
         bodyStats: {
           weight: formData.weight,
           height: formData.height,
@@ -172,6 +171,7 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
         lastCheckOut: null,
         totalCheckInsThisMonth: 0,
         trainer: formData.trainer,
+        trainerPhone: formData.trainerPhone,
         avatar: formData.avatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 99999999)}?w=150&auto=format&fit=crop&q=80`,
         bodyStats: {
           weight: formData.weight,
@@ -326,7 +326,7 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
               <CustomSelect
                 value={formData.plan}
                 onChange={(val) => setFormData({ ...formData, plan: val })}
-                options={gymPlans.map(plan => ({
+                options={plans.map(plan => ({
                   label: `${plan.name} (${plan.price})`,
                   value: plan.name
                 }))}
@@ -419,18 +419,31 @@ export default function AddMemberModal({ onClose, onAddMember, initialMember, on
           )}
 
           {/* Assigned Trainer */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-              ASSIGNED TRAINER
-            </label>
-            <CustomSelect
-              value={formData.trainer}
-              onChange={(val) => setFormData({ ...formData, trainer: val })}
-              options={gymTrainers.map(tr => ({
-                label: `${tr.name} — ${tr.specialty}`,
-                value: tr.name
-              }))}
-            />
+          <div className="content-grid-2" style={{ gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                ASSIGNED TRAINER NAME
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="e.g. Elena Rostova"
+                value={formData.trainer}
+                onChange={(e) => setFormData({ ...formData, trainer: e.target.value })}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                TRAINER PHONE NUMBER
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="+91 98765 43211"
+                value={formData.trainerPhone}
+                onChange={(e) => setFormData({ ...formData, trainerPhone: e.target.value })}
+              />
+            </div>
           </div>
 
           {/* Body Stats */}

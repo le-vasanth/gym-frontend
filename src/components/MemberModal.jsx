@@ -83,7 +83,7 @@ export default function MemberModal({ member, onClose, onCheckIn, onEditMember, 
           </div>
           <div>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>ASSIGNED TRAINER</span>
-            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--accent-lime)' }}>{member.trainer}</span>
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--accent-lime)' }}>{member.trainer} {member.trainerPhone ? `(${member.trainerPhone})` : ''}</span>
           </div>
         </div>
 

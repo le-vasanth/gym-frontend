@@ -20,6 +20,7 @@ const mapMemberToFront = (m) => ({
   lastCheckIn: m.last_check_in,
   totalCheckInsThisMonth: m.total_check_ins_this_month,
   trainer: m.trainer,
+  trainerPhone: m.trainer_phone,
   avatar: m.avatar,
   bodyStats: { weight: m.weight, height: m.height, bodyFat: m.body_fat },
   workoutGoal: m.workout_goal
@@ -45,6 +46,7 @@ const mapMemberToDB = (m) => ({
   last_check_in: m.lastCheckIn,
   total_check_ins_this_month: m.totalCheckInsThisMonth,
   trainer: m.trainer,
+  trainer_phone: m.trainerPhone,
   avatar: m.avatar,
   weight: m.bodyStats?.weight,
   height: m.bodyStats?.height,
@@ -162,5 +164,34 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to create attendance log');
     return mapLogToFront(await res.json());
+  },
+
+  getPlans: async () => {
+    const res = await fetch(`${API_URL}/plans`);
+    if (!res.ok) throw new Error('Failed to fetch plans');
+    return await res.json();
+  },
+  createPlan: async (plan) => {
+    const res = await fetch(`${API_URL}/plans`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(plan)
+    });
+    if (!res.ok) throw new Error('Failed to create plan');
+    return await res.json();
+  },
+  updatePlan: async (id, plan) => {
+    const res = await fetch(`${API_URL}/plans/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(plan)
+    });
+    if (!res.ok) throw new Error('Failed to update plan');
+    return await res.json();
+  },
+  deletePlan: async (id) => {
+    const res = await fetch(`${API_URL}/plans/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete plan');
+    return;
   }
 };

@@ -1,7 +1,33 @@
-import React from 'react';
-import { CreditCard, Check, Sparkles, Plus, Award, Flame } from 'lucide-react';
+import React, { useState } from 'react';
+import { CreditCard, Check, Sparkles, Plus, Award, Flame, Edit, Trash2 } from 'lucide-react';
+import PlanModal from './PlanModal';
+import { api } from '../api';
 
-export default function PlansView({ plans, showToast }) {
+export default function PlansView({ plans, setPlans, showToast }) {
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSavePlan = (savedPlan) => {
+    if (editingPlan) {
+      setPlans(plans.map(p => p.id === savedPlan.id ? savedPlan : p));
+    } else {
+      setPlans([...plans, savedPlan]);
+    }
+  };
+
+  const handleDeletePlan = async (id, name) => {
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      try {
+        await api.deletePlan(id);
+        setPlans(plans.filter(p => p.id !== id));
+        showToast('Plan deleted successfully!');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to delete plan.');
+      }
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
@@ -20,84 +46,100 @@ export default function PlansView({ plans, showToast }) {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => showToast("Custom Plan creation will be available in a future update!")}>
+        <button className="btn-primary" onClick={() => { setEditingPlan(null); setIsModalOpen(true); }}>
           <Plus size={16} />
           <span>+ Create New Plan</span>
         </button>
       </div>
 
-      {/* Grid of Pricing Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
-        {plans.map((plan) => {
-          const isVip = plan.name.includes('VIP');
-          return (
-            <div
-              key={plan.id}
-              className="glass-card"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                border: isVip ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid var(--border-glass)',
-                boxShadow: isVip ? '0 0 30px rgba(168, 85, 247, 0.18)' : 'none',
-                position: 'relative',
-                padding: '1.75rem'
-              }}
-            >
-              {isVip && (
-                <span className="badge badge-vip" style={{ position: 'absolute', top: '16px', right: '16px' }}>
-                  <Sparkles size={12} /> Best Seller
-                </span>
-              )}
+      {plans.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.5)', borderRadius: '12px' }}>
+          <p style={{ color: 'var(--text-muted)' }}>No plans found. Create one to get started!</p>
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          {plans.map((plan) => {
+            const isVip = plan.name.includes('VIP');
+            return (
+              <div
+                key={plan.id}
+                className="glass-card"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  border: isVip ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid var(--border-glass)',
+                  boxShadow: isVip ? '0 0 30px rgba(168, 85, 247, 0.18)' : 'none',
+                  position: 'relative',
+                  padding: '1.75rem'
+                }}
+              >
+                {isVip && (
+                  <span className="badge badge-vip" style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                    <Sparkles size={12} /> Best Seller
+                  </span>
+                )}
 
-              <div>
-                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  {plan.duration} ACCESS
-                </span>
-                <h3 style={{ fontSize: '1.4rem', margin: '0.2rem 0 0.6rem 0' }}>
-                  {plan.name}
-                </h3>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '1.25rem' }}>
-                  <span style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                    {plan.price.split('/')[0]}
+                <button 
+                  onClick={() => handleDeletePlan(plan.id, plan.name)}
+                  style={{ position: 'absolute', top: '16px', right: isVip ? '110px' : '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem' }}
+                  title="Delete Plan"
+                >
+                  <Trash2 size={16} />
+                </button>
+
+                <div>
+                  <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    {plan.duration} ACCESS
                   </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    /{plan.price.split('/')[1]}
-                  </span>
+                  <h3 style={{ fontSize: '1.4rem', margin: '0.2rem 0 0.6rem 0' }}>
+                    {plan.name}
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '1.25rem' }}>
+                    <span style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                      {plan.price.split('/')[0] || plan.price}
+                    </span>
+                    {plan.price.includes('/') && (
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        /{plan.price.split('/')[1]}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.1rem', marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>
+                      INCLUDED PERKS & ACCESS:
+                    </p>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      {plan.perks.map((perk, i) => (
+                        <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
+                          <Check size={16} color="var(--accent-lime)" />
+                          <span>{perk}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.1rem', marginBottom: '1.5rem' }}>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>
-                    INCLUDED PERKS & ACCESS:
-                  </p>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    {plan.perks.map((perk, i) => (
-                      <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
-                        <Check size={16} color="var(--accent-lime)" />
-                        <span>{perk}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button className="btn-secondary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => { setEditingPlan(plan); setIsModalOpen(true); }}>
+                    <Edit size={16} />
+                    <span style={{ marginLeft: '4px' }}>Edit</span>
+                  </button>
+                  <button className="btn-primary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => showToast("To assign this plan, go to the Payments tab and click + Add Member!")}>
+                    Assign Plan
+                  </button>
                 </div>
               </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button className="btn-secondary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => showToast("Pricing edits require Admin PRO access.")}>
-                  Edit Pricing
-                </button>
-                <button className="btn-primary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => showToast("To assign this plan, go to the Payments tab and click + Add Member!")}>
-                  Assign Plan
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Footer explanation banner */}
       <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -109,6 +151,15 @@ export default function PlansView({ plans, showToast }) {
           </p>
         </div>
       </div>
+
+      {isModalOpen && (
+        <PlanModal 
+          plan={editingPlan} 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={handleSavePlan}
+          showToast={showToast}
+        />
+      )}
     </div>
   );
 }

@@ -65,7 +65,7 @@ export default function App() {
   const [members, setMembers] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [attendanceLogs, setAttendanceLogs] = useState([]);
-  const [plans] = useState(gymPlans);
+  const [plans, setPlans] = useState([]);
 
   // Dynamically calculate analytics
   const analytics = {
@@ -79,14 +79,16 @@ export default function App() {
     if (!isAuthenticated) return;
     const loadData = async () => {
       try {
-        const [m, t, a] = await Promise.all([
+        const [m, t, a, p] = await Promise.all([
           api.getMembers(),
           api.getTransactions(),
-          api.getAttendanceLogs()
+          api.getAttendanceLogs(),
+          api.getPlans()
         ]);
         setMembers(m);
         setTransactions(t);
         setAttendanceLogs(a);
+        setPlans(p);
       } catch (err) {
         console.error("Failed to fetch API data:", err);
       }
@@ -397,6 +399,7 @@ export default function App() {
           {activeTab === 'plans' && (
             <PlansView
               plans={plans}
+              setPlans={setPlans}
               showToast={showToast}
             />
           )}
@@ -425,6 +428,7 @@ export default function App() {
             setIsAddMemberOpen(false);
             setEditingMember(null);
           }}
+          plans={plans}
           onAddMember={handleAddMember}
           onEditMember={handleEditMember}
         />
