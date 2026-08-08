@@ -85,14 +85,6 @@ export default function PlansView({ plans, setPlans, showToast }) {
                   </span>
                 )}
 
-                <button 
-                  onClick={() => handleDeletePlan(plan.id, plan.name)}
-                  style={{ position: 'absolute', top: '16px', right: isVip ? '110px' : '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem' }}
-                  title="Delete Plan"
-                >
-                  <Trash2 size={16} />
-                </button>
-
                 <div>
                   <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>
                     {plan.duration} ACCESS
@@ -126,13 +118,16 @@ export default function PlansView({ plans, setPlans, showToast }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button className="btn-secondary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => { setEditingPlan(plan); setIsModalOpen(true); }}>
                     <Edit size={16} />
                     <span style={{ marginLeft: '4px' }}>Edit</span>
                   </button>
-                  <button className="btn-primary" style={{ flex: 1, padding: '0.65rem' }} onClick={() => showToast("To assign this plan, go to the Payments tab and click + Add Member!")}>
-                    Assign Plan
+                  <button className="btn-secondary" style={{ padding: '0.65rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)', background: 'rgba(239, 68, 68, 0.05)' }} onClick={() => handleDeletePlan(plan.id, plan.name)} title="Delete Plan">
+                    <Trash2 size={16} />
+                  </button>
+                  <button className="btn-primary" style={{ flex: 1.5, padding: '0.65rem' }} onClick={() => showToast("To assign this plan, go to the Payments tab and click + Add Member!")}>
+                    Assign
                   </button>
                 </div>
               </div>
