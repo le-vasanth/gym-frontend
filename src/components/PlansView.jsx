@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, Sparkles, Plus, Award, Flame, Edit, Trash2 } from 'lucide-react';
+import { CreditCard, Check, Sparkles, Plus, Award, Flame, Edit, Trash2, AlertTriangle, X } from 'lucide-react';
 import PlanModal from './PlanModal';
 import { api } from '../api';
 
 export default function PlansView({ plans, setPlans, showToast }) {
   const [editingPlan, setEditingPlan] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState(null);
 
   const handleSavePlan = (savedPlan) => {
     if (editingPlan) {
@@ -15,17 +16,17 @@ export default function PlansView({ plans, setPlans, showToast }) {
     }
   };
 
-  const handleDeletePlan = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      try {
-        await api.deletePlan(id);
-        setPlans(plans.filter(p => p.id !== id));
-        showToast('Plan deleted successfully!');
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to delete plan.');
-      }
+  const confirmDelete = async () => {
+    if (!planToDelete) return;
+    try {
+      await api.deletePlan(planToDelete.id);
+      setPlans(plans.filter(p => p.id !== planToDelete.id));
+      showToast('Plan deleted successfully!');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to delete plan.');
     }
+    setPlanToDelete(null);
   };
 
   return (
@@ -123,7 +124,7 @@ export default function PlansView({ plans, setPlans, showToast }) {
                     <Edit size={16} />
                     <span style={{ marginLeft: '4px' }}>Edit</span>
                   </button>
-                  <button className="btn-secondary" style={{ padding: '0.65rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)', background: 'rgba(239, 68, 68, 0.05)' }} onClick={() => handleDeletePlan(plan.id, plan.name)} title="Delete Plan">
+                  <button className="btn-secondary" style={{ padding: '0.65rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)', background: 'rgba(239, 68, 68, 0.05)' }} onClick={() => setPlanToDelete(plan)} title="Delete Plan">
                     <Trash2 size={16} />
                   </button>
                   <button className="btn-primary" style={{ flex: 1.5, padding: '0.65rem' }} onClick={() => showToast("To assign this plan, go to the Payments tab and click + Add Member!")}>
@@ -154,6 +155,34 @@ export default function PlansView({ plans, setPlans, showToast }) {
           onSave={handleSavePlan}
           showToast={showToast}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {planToDelete && (
+        <div className="modal-backdrop" onClick={() => setPlanToDelete(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => setPlanToDelete(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ background: '#fef2f2', width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto' }}>
+              <AlertTriangle size={28} color="#ef4444" />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', margin: '0 0 0.5rem 0', color: '#0f172a' }}>Delete this Plan?</h3>
+            <p style={{ color: '#475569', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              Are you sure you want to permanently delete the <strong>{planToDelete.name}</strong> package? Members already assigned to this plan will not be affected.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setPlanToDelete(null)}>
+                Cancel
+              </button>
+              <button className="btn-primary" style={{ flex: 1, background: '#ef4444', borderColor: '#ef4444', color: '#fff' }} onClick={confirmDelete}>
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
