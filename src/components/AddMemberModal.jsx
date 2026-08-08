@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, UserPlus, Camera, Upload, Trash2 } from 'lucide-react';
-import { X, UserPlus, Camera, Upload, Trash2 } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 
 export default function AddMemberModal({ onClose, onAddMember, initialMember, onEditMember, plans = [] }) {
